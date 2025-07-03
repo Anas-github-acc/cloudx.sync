@@ -2,14 +2,6 @@
 
 A comprehensive Windows application for synchronizing local project files with Box cloud storage and Firebase, featuring real-time file monitoring and automated backup capabilities.
 
-## 🔥 Technical Highlights
-
-- **Enterprise-Grade Asynchronous Architecture**: Built with .NET 9.0's latest async/await patterns, implementing thread-safe queue management with ConcurrentQueue, background TaskScheduler orchestration, and FileSystemWatcher event debouncing to handle thousands of simultaneous file operations without blocking the UI thread or causing race conditions.
-
-- **Multi-Cloud OAuth JWT Authentication Pipeline**: Implements RFC 7523 JWT Bearer Token authentication with RSA-256 encrypted private keys for Box Enterprise API, combined with Firebase Admin SDK service account impersonation, featuring automatic token refresh, secure credential vault management, and OAuth 2.0 PKCE flow with localhost callback interception.
-
-- **Real-Time Distributed State Synchronization**: Leverages Firebase Firestore's real-time listeners with conflict resolution algorithms, implementing vector clocks for distributed file versioning, delta synchronization with binary diff algorithms, and atomic transaction batching to maintain data consistency across multiple devices and cloud storage providers simultaneously.
-
 ## 🚀 Features
 
 - **Real-time File Synchronization**: Automatically sync local projects with Box cloud storage
