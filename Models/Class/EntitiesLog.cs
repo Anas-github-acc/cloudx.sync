@@ -17,28 +17,6 @@ namespace WindowsApp.Models.Class
         public required string FolderId {get; set;}
         public int Status { get; set; }
         public string? Id {get; set;}
-        public required metaDataProject metaDataProject { get; set; }
-        public required string url_readme {get; set;}
-    }
-
-    [FirestoreData] 
-    public class public_files{
-        [FirestoreProperty]
-        public required string extention {get; set;}
-        [FirestoreProperty]
-        public required string name {get; set;}
-        [FirestoreProperty]
-        public required string share {get; set;}
-    }
-
-    [FirestoreData] 
-    public class metaDataProject{
-        [FirestoreProperty]
-        public required string description { get; set; }
-        [FirestoreProperty]
-        public required public_files[] public_files { get; set; }
-        [FirestoreProperty]
-        public required string url_image { get; set; }
     }
 
     [FirestoreData] 
@@ -58,11 +36,6 @@ namespace WindowsApp.Models.Class
         public int Status { get; set; }
         [FirestoreProperty]
         public string? Id { get; set; }
-        
-        [FirestoreProperty]
-        public required metaDataProject metaDataProject { get; set; }
-        [FirestoreProperty]
-        public required string url_readme {get; set;}
     }
 
     public static class ProjectDataConverter
@@ -77,13 +50,7 @@ namespace WindowsApp.Models.Class
                 AsyncTime = projectData.AsyncTime.ToString("o"), // Usando formato ISO 8601 para garantir consistência
                 FolderId = projectData.FolderId,
                 Status = projectData.Status,
-                Id = projectData.Id,
-                metaDataProject = new metaDataProject{
-                    description = projectData.metaDataProject.description ?? "",
-                    public_files = projectData.metaDataProject.public_files ?? [],
-                    url_image = projectData.metaDataProject.url_image ?? ""
-                },
-                url_readme = projectData.url_readme
+                Id = projectData.Id
             };
         }
         
@@ -97,13 +64,7 @@ namespace WindowsApp.Models.Class
                 AsyncTime = DateTime.Parse(firestoreDocument.AsyncTime), // Parse para DateTime
                 FolderId = firestoreDocument.FolderId,
                 Status = firestoreDocument.Status,
-                Id = firestoreDocument.Id,
-                metaDataProject = new metaDataProject{
-                    description = firestoreDocument.metaDataProject.description ?? "",
-                    public_files = firestoreDocument.metaDataProject.public_files ?? [],
-                    url_image = firestoreDocument.metaDataProject.url_image ?? ""
-                },
-                url_readme = firestoreDocument.url_readme
+                Id = firestoreDocument.Id
             };
         }
     }

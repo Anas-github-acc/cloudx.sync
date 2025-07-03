@@ -4,7 +4,6 @@ using WindowsApp.Helpers;
 using WindowsApp.Models.Class; // Importa FileModel e Project
 using WindowsApp.Utils;
 using WindowsApp.Managers.Uploaders;
-using System.Text.Json;
 
 namespace WindowsApp.Managers{
     public class ManagerProject{
@@ -95,9 +94,7 @@ namespace WindowsApp.Managers{
 
             if(CreateFolderProject_Local(folderPath)){
                 if(await CreateMetaDataProject_Local(DataProject)){
-                    if(CreateREADMEProject(DataProject.url_readme, folderPath)){
-                        return await CloudProjectSync_Sync(auth, DataProject, folderPath);
-                    }
+                    return await CloudProjectSync_Sync(auth, DataProject, folderPath);
                 }
             }
 
@@ -111,13 +108,7 @@ namespace WindowsApp.Managers{
                     Device = DataProject.Device,
                     Status = DataProject.Status,
                     FolderId = "",
-                    Id = DataProject.Id ?? null,
-                    metaDataProject = new metaDataProject{
-                        description = DataProject.metaDataProject.description,
-                        public_files = DataProject.metaDataProject.public_files,
-                        url_image = DataProject.metaDataProject.url_image
-                    },
-                    url_readme = DataProject.url_readme
+                    Id = DataProject.Id ?? null
                 };
                 var MetaData = await UpdateMetaData.UpdateMetaDataLog(DataProjectForLog.Name, DataProjectForLog);
                 if(MetaData){
@@ -175,75 +166,9 @@ namespace WindowsApp.Managers{
                 }
             }
 
-            bool CreateREADMEProject(string readme_md, string folderPath){
-                try{
-                    if (!File.Exists(folderPath))
-                    {
-                        File.Create($"{folderPath}/{readme_md}");
-                        return true;
-                    }
-                    else
-                    {
-                        Console.WriteLine($"O arquivo já existe: {folderPath+"/"+readme_md}. Código do Erro: |5123|");
-                        return false; // Código de erro 5123: Pasta já existente
-                    }
-                }
-                catch (UnauthorizedAccessException ex)
-                {
-                    Console.WriteLine($"Erro ao criar o arquivo: Permissão negada. Código do Erro: |3123|");
-                    Console.WriteLine($"Detalhes do erro: {ex.Message}");
-                    return false; // Código de erro 3123: Permissão negada
-                }
-                catch (ArgumentException ex)
-                {
-                    Console.WriteLine($"Erro ao criar o arquivo: Caminho inválido. Código do Erro: |3223|");
-                    Console.WriteLine($"Detalhes do erro: {ex.Message}");
-                    return false; // Código de erro 3223: Caminho inválido
-                }
-                catch (PathTooLongException ex)
-                {
-                    Console.WriteLine($"Erro ao criar o arquivo: Caminho muito longo. Código do Erro: |3323|");
-                    Console.WriteLine($"Detalhes do erro: {ex.Message}");
-                    return false; // Código de erro 3323: Caminho muito longo
-                }
-                catch (IOException ex)
-                {
-                    Console.WriteLine($"Erro ao criar o arquivo: Erro de I/O. Código do Erro: |3423|");
-                    Console.WriteLine($"Detalhes do erro: {ex.Message}");
-                    return false; // Código de erro 3423: Erro de I/O
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Erro desconhecido ao criar o arquivo. Código do Erro: |3523|");
-                    Console.WriteLine($"Detalhes do erro: {ex.Message}");
-                    return false; // Código de erro 3523: Erro desconhecido
-                }
-            }
-
             async Task<bool> CloudProjectSync_Sync(BoxClient auth, Project DataProject, string DefaultPathForProjects){
                 CentralCache.Instance.AddToCache("NameProject", DataProject.Name); // adiciona dados importante em cache
                 return await new BoxUploader().UploadManager(auth, DefaultPathForProjects,"mainFolder", null, "mainFolder");
-            }
-        }
-
-        public static async Task<bool> ChangePublicFilesMetadata(string NameProject, public_files[] publicFiles){
-            Metadata projects = await GetLogs.GetProjectsLogFile();
-                var metadataSingleProject = projects.LocalProjects != null && projects.LocalProjects.ContainsKey(NameProject)
-                    ? projects.LocalProjects[NameProject]
-                    : null;
-
-            try{
-                if(metadataSingleProject == null || projects == null || metadataSingleProject?.metaDataProject == null ||  metadataSingleProject?.metaDataProject.public_files == null){
-                    return false;
-                }
-
-                metadataSingleProject.metaDataProject.public_files = publicFiles;
-                
-                return await UpdateMetaData.UpdateMetaDataLog(NameProject, metadataSingleProject);
-            } 
-            catch(Exception ex){
-                Console.WriteLine($"Erro ao modificar public_files: ${ex}");
-                return false;
             }
         }
 
@@ -257,41 +182,35 @@ namespace WindowsApp.Managers{
                 return false;
             }
 
-            static async Task<ProjectData> ChangeMetaDataProject_Local(string NameProject, string KeyForChange, string ValueForChange)
-            {
+            static async Task<ProjectData> ChangeMetaDataProject_Local(string NameProject, string KeyForChange, string ValueForChange){
                 Metadata projects = await GetLogs.GetProjectsLogFile();
-                var metadataSingleProject = projects.LocalProjects != null && projects.LocalProjects.ContainsKey(NameProject)
-                    ? projects.LocalProjects[NameProject]
+                var metadataSingleProject = projects.LocalProjects != null && projects.LocalProjects.ContainsKey(NameProject) 
+                    ? projects.LocalProjects[NameProject] 
                     : null;
 
-                if (metadataSingleProject != null && projects != null)
-                {
-                    try
-                    {
-                        // Lida com propriedades de nível superior como antes
-                        var property = typeof(ProjectData).GetProperty(KeyForChange, BindingFlags.Public | BindingFlags.Instance);
-                        if (property != null && property.CanWrite)
+
+                if(metadataSingleProject != null && projects != null){
+                    var property = typeof(ProjectData).GetProperty(KeyForChange, BindingFlags.Public | BindingFlags.Instance);
+                    if (property != null && property.CanWrite){
+                        try
                         {
+                            // Converte o ValueForChange para o tipo correto da propriedade
                             var convertedValue = Convert.ChangeType(ValueForChange, property.PropertyType);
                             property.SetValue(metadataSingleProject, convertedValue);
-                        }
-                        else
-                        {
-                            throw new Exception($"ManagerProject : ChangeMetaDataProject_Local(), error: prop '{KeyForChange}' not found or impossible to change");
-                        }
 
-                        return metadataSingleProject;
+                            return metadataSingleProject;
+                        }catch{
+                            throw new Exception($"ManagerProject : ChangeMetaDataProject_Local(), error: chanding prop value of metadata");
+                        }
+                    }else{
+                        throw new Exception($"ManagerProject : ChangeMetaDataProject_Local(), error: prop not found or impossible change");
                     }
-                    catch (Exception ex)
-                    {
-                        throw new Exception($"ManagerProject : ChangeMetaDataProject_Local(), error: {ex.Message}");
-                    }
-                }
-                else
-                {
+                }else{
                     throw new Exception($"ManagerProject : ChangeMetaDataProject_Local(), error: project not found");
                 }
             }
+
+            
         }
 
         public static async Task<Metadata?> ListProjects(){

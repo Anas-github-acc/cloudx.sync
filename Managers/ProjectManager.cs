@@ -15,20 +15,14 @@ namespace WindowsApp.Managers{
             managerProject = new ManagerProject(_auth);
         }
 
-        public async Task<bool> AddProject(BoxClient auth, string NameProject, string Description){ // Adiciona um novo projeto - Variavel Local
+        public async Task<bool> AddProject(BoxClient auth, string NameProject){ // Adiciona um novo projeto - Variavel Local
             
             var DataProject = new Project {
                 Id = Guid.NewGuid().ToString(),
                 Name = NameProject,
                 DateTime = DateTime.Now,
                 Device = Environment.MachineName.ToString(),
-                Status = 0,
-                metaDataProject = new metaDataProject{
-                        description = Description ?? "",
-                        public_files = [],
-                        url_image = ""
-                },
-                url_readme = $"{NameProject}.md"
+                Status = 0
             };
             
             if(await managerProject.CreateProject(auth, DataProject)){

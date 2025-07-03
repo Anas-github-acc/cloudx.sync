@@ -2,6 +2,7 @@ using YamlDotNet.Serialization;
 using WindowsApp.Models.Class;
 using WindowsApp.Managers.Firebase;
 using WindowsApp.Utils;
+
 namespace WindowsApp.Helpers
 {
     public class GenerateLog
@@ -52,13 +53,7 @@ namespace WindowsApp.Helpers
                     Status = DataProject.Status,
                     AsyncTime = DateTime.Now,
                     FolderId = DataProject.FolderId,
-                    Id = DataProject.Id ?? null,
-                    metaDataProject = new metaDataProject{
-                        description = DataProject.metaDataProject.description,
-                        public_files = DataProject.metaDataProject.public_files,
-                        url_image = DataProject.metaDataProject.url_image
-                    },
-                    url_readme = DataProject.url_readme
+                    Id = DataProject.Id ?? null
                 };
 
                 if(await ChangeMetaData(metaDataProject)){
@@ -177,7 +172,7 @@ namespace WindowsApp.Helpers
     // Função para comparar os dados locais (LocalProjects) com os dados do Firestore
     public class SyncronizationMetaData{
         public static async Task<bool> SyncMetaData(){
-            List<FirestoreDocument> _firebaseMetaData = await FirebaseManager.GetAllDocumentsAsync("metadata");            
+            List<FirestoreDocument> _firebaseMetaData = await FirebaseManager.GetAllDocumentsAsync("metadata");
             Metadata _localMetadaData = await GetLogs.GetProjectsLogFile();
             try{
                 List<FirestoreDocument> _Divergents = CompareLocalWithFirestore(_localMetadaData.LocalProjects, _firebaseMetaData);
@@ -223,13 +218,7 @@ namespace WindowsApp.Helpers
                         Device = localProject.Value.Device,
                         FolderId = localProject.Value.FolderId,
                         Status = localProject.Value.Status,
-                        Id = null,
-                        metaDataProject = new metaDataProject{
-                        description = localProject.Value.metaDataProject.description,
-                        public_files = localProject.Value.metaDataProject.public_files,
-                        url_image = localProject.Value.metaDataProject.url_image
-                        },
-                        url_readme = localProject.Value.url_readme
+                        Id = null
                     });
                 }
                 else
@@ -260,16 +249,11 @@ namespace WindowsApp.Helpers
                 }
             }
 
-            /* Criar uma função de logs.depuração, que vai gerar logs */
             return divergentDocuments;
         }
     
         private static async Task<bool> CreateOrUpdateMetaDataBD(List<FirestoreDocument> _Divergents, List<FirestoreDocument>  _firebaseMetaData){
             try{
-                if(_Divergents == null){
-                    return true;
-                }
-
                 foreach (var divergentDoc in _Divergents)
                 {
                     var existingDoc = _firebaseMetaData.FirstOrDefault(doc => doc.Name == divergentDoc.Name);

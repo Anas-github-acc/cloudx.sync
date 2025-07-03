@@ -2,10 +2,6 @@ using Box.Sdk.Gen;
 using WindowsApp.Utils;
 using WindowsApp.Managers.Uploaders.Folders;
 using WindowsApp.Managers.Uploaders.Files;
-using WindowsApp.Models.Class;
-
-using System.Text.Json;
-
 namespace WindowsApp.Managers.Uploaders{
     public class BoxUploader
     {
@@ -40,9 +36,7 @@ namespace WindowsApp.Managers.Uploaders{
                 case "FolderRenamed":
                     return await RenameFolders(auth, filePath, OldFilePath);
                 case "mainFolder": 
-                    return await MainFolderProject(auth, filePath);  
-                case "readme": 
-                    // return await MainFolderProject(auth, filePath);                   
+                    return await MainFolderProject(auth, filePath);                   
                 default:
                     return false;
             }
@@ -134,53 +128,6 @@ namespace WindowsApp.Managers.Uploaders{
             }
         }
 
-        public static async Task<bool> UpdateFileListMetadataProject(BoxClient client, string? PathFile, string? nameFile, string? ShareLink, string? type, string? NameProject = null){
-            if(NameProject == null){
-                var nameProjectObj = CentralCache.Instance.GetFromCache("NameProject");
-                NameProject = nameProjectObj != null ? nameProjectObj.ToString() : string.Empty;
-            }
-
-            var metadataProject = await new ManagerProject(client).GetProject(NameProject);
-            
-            if(metadataProject == null){
-                return false;
-            }
-
-            var _public_files = metadataProject.metaDataProject.public_files;
-
-            switch(type){
-                case "add":
-                    return await ADD(_public_files, nameFile, ShareLink, PathFile, NameProject);
-                case "remove":
-                    return await REMOVE(_public_files, nameFile, NameProject);
-                default: 
-                    return await ADD(_public_files, nameFile, ShareLink, PathFile, NameProject);
-            }
-
-            async static Task<bool> ADD(public_files[] _public_files, string? nameFile, string? ShareLink, string? PathFile, string NameProject){
-                if(nameFile == null || ShareLink == null || PathFile == null){
-                    return false;
-                }
-
-                _public_files = _public_files.Append(new public_files
-                {
-                    extention = PathFile.Split(".")[1],
-                    name = nameFile,
-                    share = ShareLink
-                }).ToArray();
-
-                return await ManagerProject.ChangePublicFilesMetadata(NameProject, _public_files);
-            }
-
-            async static Task<bool> REMOVE(public_files[] _public_files, string? nameFile, string NameProject){
-                if(nameFile == null){
-                    return false;
-                }
-
-                _public_files = _public_files.Where(file => file.name != nameFile).ToArray();
-                return await ManagerProject.ChangePublicFilesMetadata(NameProject, _public_files);
-            }
-        }
         private static string? GetNameProjectByDynamicPath(string filePath)
         {
             // Obtém os diretórios do caminho

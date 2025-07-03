@@ -127,7 +127,7 @@ namespace WindowsApp.Views
                 {
                     try
                     {
-                        await _projectManager.AddProject(_auth, NameProject, "");
+                        await _projectManager.AddProject(_auth, NameProject);
                     }
                     catch (Exception ex)
                     {

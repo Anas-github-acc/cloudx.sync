@@ -1,9 +1,6 @@
 using Google.Cloud.Firestore;
 using WindowsAppSync.Services.API;
 using WindowsApp.Models.Class;
-using Newtonsoft.Json;
-
-using System.Text.Json;
 
 namespace WindowsApp.Managers.Firebase
 {
@@ -73,10 +70,6 @@ namespace WindowsApp.Managers.Firebase
                 {
                     var documentData = document.ToDictionary();
 
-                    var metaDataProjectData = documentData["metaDataProject"] as Dictionary<string, object>; // Pega o dicionário aninhado
-                    var metaDataProject = metaDataProjectData != null ? JsonConvert.DeserializeObject<metaDataProject>(JsonConvert.SerializeObject(metaDataProjectData)) : new metaDataProject {description = "", public_files = [], url_image = ""}; // Deserializa, lidando com null
-
-
                     var firestoreDocument = new FirestoreDocument
                     {
                         Name = documentData["Name"] as string ?? string.Empty,
@@ -85,10 +78,9 @@ namespace WindowsApp.Managers.Firebase
                         AsyncTime = documentData["AsyncTime"] as string ?? string.Empty,
                         FolderId = documentData["FolderId"] as string ?? string.Empty,
                         Status = Convert.ToInt32(documentData["Status"]),
-                        Id = document.Id,
-                        metaDataProject = metaDataProject ?? new metaDataProject {description = "", public_files = [], url_image = ""},
-                        url_readme = documentData["url_readme"] as string ?? string.Empty,
+                        Id = document.Id
                     };
+
                     documents.Add(firestoreDocument);
                 }
 

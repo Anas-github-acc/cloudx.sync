@@ -2,20 +2,6 @@ using WindowsApp.Managers;
 using WindowsAppSync.Services.API;
 using Box.Sdk.Gen;
 
-/*
-
-    TODO: 
-    
-    Organizar as funções com @Function @type @Description @return @params
-
-    /// <summary>
-    /// Revoke an active Access Token, effectively logging a user out that has been previously authenticated.
-    /// </summary>
-    /// <param name="networkSession">
-    /// An object to keep network session state
-    /// </param>
-*/
-
 namespace WindowsApp.Views
 {
     public class SetApp : Form
@@ -39,21 +25,13 @@ namespace WindowsApp.Views
 
         public SetApp()
         {
-            InitializeComponentsAsync();
-            SetTrayIcon(); // Função para configurar o ícone da bandeja
-            MinimizeToTray(); // Função para minimizar para a bandeja
+            _ = InitializeComponentsAsync();
+           SetTrayIcon(); // Função para configurar o ícone da bandeja
+           MinimizeToTray(); // Função para minimizar para a bandeja
         }
 
-        private void InitializeComponentsAsync()
+        private async Task InitializeComponentsAsync()
         {
-            SetFormProperties();
-            SetUpControls();
-        }
-
-        private async Task InicializeAuth(){
-            if(_projectManager != null || _projectsForm != null){
-                return;
-            }
 
             var authenticationCompletionSource = new TaskCompletionSource();
             _auth = await Authenticator.Auth();
@@ -63,6 +41,10 @@ namespace WindowsApp.Views
             _projectManager = new ProjectManager(_auth);
             _projectsForm = new ProjectsApp(_auth, _projectManager);
             FirebaseAuthenticator.AuthenticateWithOAuthAsync();
+
+            SyncMetaDataProject();
+            SetFormProperties();
+            SetUpControls();
         }
 
         private void SetFormProperties()
@@ -152,8 +134,6 @@ namespace WindowsApp.Views
         // Evento de Projetos
         private void BtnProjects_Click(object? sender, EventArgs e)
         {
-            _ = InicializeAuth();
-            SyncMetaDataProject();
             _projectsForm?.ShowDialog();
         }
 
@@ -167,14 +147,12 @@ namespace WindowsApp.Views
         // Evento para Iniciar a Sincronização
         private void BtnStartSync_Click(object? sender, EventArgs e)
         {
-            _ = InicializeAuth();
             HandleSyncAction(true);
         }
 
         // Evento para Parar a Sincronização
         private void BtnStopSync_Click(object? sender, EventArgs e)
         {
-            _ = InicializeAuth();
             HandleSyncAction(false);
         }
 
@@ -232,16 +210,9 @@ namespace WindowsApp.Views
             trayMenu.Items.Add("Abrir", null, TrayOpen_Click);
             trayMenu.Items.Add("Sair", null, TrayExit_Click);
 
-            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string iconPath = Path.Combine(baseDirectory, "Resources", "icone.ico");
-
-            if (!File.Exists(iconPath)){
-                return;
-            }
-
             trayIcon = new NotifyIcon
             {
-                Icon = new Icon(iconPath), // Ícone da bandeja
+                Icon = new Icon("./Resources/icone.ico"), // Ícone da bandeja
                 ContextMenuStrip = trayMenu,
                 Visible = true
             };

@@ -1,6 +1,6 @@
-using WindowsApp.Models.Class;
-
+#pragma warning disable IDE0130 // O namespace não corresponde à estrutura da pasta
 namespace WindowsApp.Models.Class
+#pragma warning restore IDE0130 // O namespace não corresponde à estrutura da pasta
 {
     public class Project
     {
@@ -10,8 +10,6 @@ namespace WindowsApp.Models.Class
         public DateTime DateTime { get; set; }
         public string Device { get; set; }
         public int Status { get; set; }
-        public required metaDataProject metaDataProject { get; set; }
-        public required string url_readme {get; set;}
 
         public Project()
         {

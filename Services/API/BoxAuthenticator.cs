@@ -1,7 +1,6 @@
 using Box.Sdk.Gen;
 using WindowsApp.Helpers;
 using System.Net;
-using System.Text.Json;
 
 namespace WindowsAppSync.Services.API
 {
@@ -20,6 +19,7 @@ namespace WindowsAppSync.Services.API
 
             var config = new OAuthConfig(clientId: _config.APIConfigs.ClientId, clientSecret: _config.APIConfigs.ClientSecret);
             var auth = new BoxOAuth(config);
+
             
             // Gera a URL de autorização
             string RedirectUri = "http://localhost:5000/callback";
